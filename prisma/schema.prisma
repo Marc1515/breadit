@@ -93,9 +93,9 @@ model Post {
   updatedAt   DateTime  @updatedAt
   author      User      @relation(fields: [authorId], references: [id])
   authorId    String
-  subreddit   Subreddit @relation(fields: [subredditId], references: [id])
+  subreddit   Subreddit @relation(fields: [subredditId], references: [id], onDelete: Cascade)
   subredditId String
-  comments    Comment[] 
+  comments    Comment[]
   votes       Vote[]
 }
 
