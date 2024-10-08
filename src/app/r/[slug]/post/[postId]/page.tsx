@@ -1,7 +1,8 @@
 import CommentsSection from "@/components/CommentsSection";
+import { DeletePostButton } from "@/components/DeletePostButton";
 import EditorOutput from "@/components/EditorOutput";
 import PostVoteServer from "@/components/post-vote/PostVoteServer";
-import { Button, buttonVariants } from "@/components/ui/Button";
+import { buttonVariants } from "@/components/ui/Button";
 import { getAuthSession } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { redis } from "@/lib/redis";
@@ -15,6 +16,7 @@ import { Suspense } from "react";
 interface SubRedditPostPageProps {
   params: {
     postId: string;
+    slug: string;
   };
 }
 
@@ -24,13 +26,9 @@ export const fetchCache = "force-no-store";
 const SubRedditPostPage = async ({ params }: SubRedditPostPageProps) => {
   const session = await getAuthSession();
 
-  /* console.log(session?.user.id); */
-
   const cachedPost = (await redis.hgetall(
     `post:${params.postId}`
   )) as CachedPost;
-
-  /* console.log(cachedPost); */
 
   let post: (Post & { votes: Vote[]; author: User }) | null = null;
 
@@ -40,13 +38,14 @@ const SubRedditPostPage = async ({ params }: SubRedditPostPageProps) => {
     },
     include: {
       votes: true,
-      author: true, // Incluye la relación con el autor
+      author: true,
     },
   });
 
   if (!post && !cachedPost) return notFound();
 
-  const isAuthor = session?.user?.id === post?.authorId;
+  const isAuthor =
+    session?.user?.id === (post?.authorId || cachedPost.authorId);
 
   return (
     <div>
@@ -77,11 +76,7 @@ const SubRedditPostPage = async ({ params }: SubRedditPostPageProps) => {
             {post?.title ?? cachedPost.title}
           </h1>
 
-          {isAuthor && (
-            <Button className="text-red-600 hover:text-red-800">
-              Delete Post
-            </Button>
-          )}
+          {isAuthor && <DeletePostButton postId={post?.id} />}
 
           <EditorOutput content={post?.content ?? cachedPost.content} />
           <Suspense
