@@ -60,6 +60,8 @@ model User {
   Post        Post[]
   Comment     Comment[]
   CommentVote CommentVote[]
+
+  isAdmin Boolean @default(false)
 }
 
 model Subreddit {
