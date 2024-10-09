@@ -15,6 +15,14 @@ export const metadata: Metadata = {
   description: "A Reddit clone built with Next.js and TypeScript.",
 };
 
+// Función para convertir los guiones en espacios y capitalizar la primera letra de cada palabra
+function formatSubredditName(name: string) {
+  return name
+    .split("-") // Dividir el nombre en palabras separadas por guiones
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1)) // Capitalizar la primera letra de cada palabra
+    .join(" "); // Unir las palabras con un espacio
+}
+
 const Layout = async ({
   children,
   params: { slug },
@@ -63,6 +71,9 @@ const Layout = async ({
 
   const isOwner = subreddit.creatorId === session?.user?.id;
 
+  // Formatear el nombre del subreddit antes de mostrarlo
+  const formattedSubredditName = formatSubredditName(subreddit.name);
+
   return (
     <div className="sm:container max-w-7xl mx-auto h-full pt-12">
       <div>
@@ -74,7 +85,9 @@ const Layout = async ({
           {/* info sidebar */}
           <div className="overflow-hidden h-fit rounded-lg border border-gray-200 order-first md:order-last">
             <div className="px-6 py-4">
-              <p className="font-semibold py-3">About r/{subreddit.name}</p>
+              <p className="font-semibold py-3">
+                About {formattedSubredditName}
+              </p>
             </div>
             <dl className="divide-y divide-gray-100 px-6 py-4 text-sm leading-6 bg-white">
               <div className="flex justify-between gap-x-4 py-3">
@@ -91,19 +104,17 @@ const Layout = async ({
                   <div className="text-gray-900">{memberCount}</div>
                 </dd>
               </div>
-              {subreddit.creatorId === session?.user?.id ? (
+              {isOwner ? (
                 <div className="flex justify-between gap-x-4 py-3">
                   <dt className="text-gray-500">You created this community</dt>
                 </div>
-              ) : null}
-
-              {subreddit.creatorId !== session?.user?.id ? (
+              ) : (
                 <SubscribeLeaveToggle
                   isSubscribed={isSubscribed}
                   subredditId={subreddit.id}
                   subredditName={subreddit.name}
                 />
-              ) : null}
+              )}
               <Link
                 className={buttonVariants({
                   variant: "outline",

@@ -6,6 +6,14 @@ import { db } from "@/lib/db";
 import { Home as HomeIcon } from "lucide-react";
 import Link from "next/link";
 
+// Función para convertir los guiones en espacios y capitalizar la primera letra de cada palabra
+function formatSubredditName(name: string) {
+  return name
+    .split("-") // Dividir el nombre en palabras separadas por guiones
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1)) // Capitalizar la primera letra de cada palabra
+    .join(" "); // Unir las palabras con un espacio
+}
+
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
 
@@ -63,16 +71,23 @@ export default async function Home() {
               </Link>
             )}
 
-            {AllSubreddits.map((subreddit, idx) => (
-              <li key={idx}>
-                <Link
-                  className="text-blue-600 hover:underline"
-                  href={`/r/${subreddit.name}`}
-                >
-                  {subreddit.name}
-                </Link>
-              </li>
-            ))}
+            {/* Bucle para listar todos los subreddits */}
+            <div className="mt-4">
+              <h2 className="font-semibold text-lg">All Communities</h2>
+              <ul className="list-disc pl-5 mt-2 space-y-2">
+                {AllSubreddits.map((subreddit, idx) => (
+                  <li key={idx}>
+                    <Link
+                      className="text-blue-600 hover:underline"
+                      href={`/r/${subreddit.name}`}
+                    >
+                      {/* Aplicar el formato al nombre del subreddit */}
+                      {formatSubredditName(subreddit.name)}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </dl>
         </div>
       </div>

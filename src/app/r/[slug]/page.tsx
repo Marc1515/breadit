@@ -50,7 +50,7 @@ const page = async ({ params }: PageProps) => {
   return (
     <>
       <h1 className="font-bold text-3xl md:text-4xl h-14">
-        r/{formattedSubredditName} {/* Mostramos el nombre formateado */}
+        {formattedSubredditName} {/* Mostramos el nombre formateado */}
       </h1>
       <MiniCreatePost session={session} />
       <PostFeed initialPosts={subreddit.posts} subredditName={subreddit.name} />
