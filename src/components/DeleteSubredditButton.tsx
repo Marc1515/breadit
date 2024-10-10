@@ -42,7 +42,7 @@ export const DeleteSubredditButton = ({
       variant={"destructive"}
       onClick={() => deleteSubreddit()}
     >
-      DeleteSubredditButton
+      Delete Community
     </Button>
   );
 };
