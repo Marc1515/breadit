@@ -93,7 +93,7 @@ export default async function Home() {
           <div className="mt-4">
             <h2 className="font-semibold text-lg px-6 py-3">Calendar</h2>
             <dl className="-my-3 divide-y divide-gray-100 px-6 py-4 text-sm leading-6">
-              <CalendarBox />
+              <CalendarBox isAdmin={isAdministrator?.isAdmin ?? false} />
             </dl>
           </div>
         </div>
