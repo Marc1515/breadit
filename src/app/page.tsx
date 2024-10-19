@@ -1,3 +1,4 @@
+import { CalendarBox } from "@/components/CalendarBox";
 import CustomFeed from "@/components/homepage/CustomFeed";
 import GeneralFeed from "@/components/homepage/GeneralFeed";
 import { buttonVariants } from "@/components/ui/Button";
@@ -89,6 +90,12 @@ export default async function Home() {
               </ul>
             </div>
           </dl>
+          <div className="mt-4">
+            <h2 className="font-semibold text-lg px-6 py-3">Calendar</h2>
+            <dl className="-my-3 divide-y divide-gray-100 px-6 py-4 text-sm leading-6">
+              <CalendarBox />
+            </dl>
+          </div>
         </div>
       </div>
     </>
