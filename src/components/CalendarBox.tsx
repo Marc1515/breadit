@@ -11,6 +11,7 @@ export const CalendarBox = () => {
   const [events, setEvents] = useState<
     { id: string; title: string; start: Date; end: Date }[]
   >([]);
+  const [isAuthenticated, setIsAuthenticated] = useState(false); // Cambia esto según tu lógica de autenticación
 
   // Función para obtener eventos desde la base de datos
   const fetchEvents = async () => {
@@ -33,7 +34,9 @@ export const CalendarBox = () => {
       setEvents(eventsWithDate);
     } catch (error) {
       console.error(error);
-      alert("Error al obtener eventos");
+      if (isAuthenticated) {
+        alert("Error al obtener eventos");
+      }
     }
   };
 
