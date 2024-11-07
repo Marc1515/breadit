@@ -16,15 +16,24 @@ export async function DELETE(req: Request) {
       return new Response("Event ID is required", { status: 400 });
     }
 
-    // Verificar que el evento pertenezca al usuario autenticado
+    // Verificar si el usuario autenticado es administrador
+    const user = await db.user.findUnique({
+      where: { id: session.user.id },
+    });
+
+    if (!user || !user.isAdmin) {
+      return new Response("Not authorized to delete this event", {
+        status: 403,
+      });
+    }
+
+    // Verificar que el evento exista
     const event = await db.event.findUnique({
       where: { id: eventId },
     });
 
-    if (!event || event.userId !== session.user.id) {
-      return new Response("Not authorized to delete this event", {
-        status: 403,
-      });
+    if (!event) {
+      return new Response("Event not found", { status: 404 });
     }
 
     // Eliminar el evento de la base de datos

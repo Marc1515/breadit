@@ -25,6 +25,9 @@ export const CalendarBox = ({ isAdmin }: CalendarBoxProps) => {
       const res = await axios.get("/api/calendar/get");
       const data = res.data;
 
+      // Depurar los datos de eventos
+      console.log("Eventos obtenidos:", data);
+
       // Convertir las fechas a objetos Date
       const eventsWithDate = data.map((event: any) => ({
         ...event,
@@ -34,7 +37,7 @@ export const CalendarBox = ({ isAdmin }: CalendarBoxProps) => {
 
       setEvents(eventsWithDate);
     } catch (error) {
-      console.error(error);
+      console.error("Error al obtener eventos:", error);
       alert("Error al obtener eventos");
     }
   };
@@ -92,7 +95,7 @@ export const CalendarBox = ({ isAdmin }: CalendarBoxProps) => {
         // Volver a obtener los eventos desde la base de datos
         await fetchEvents();
       } catch (error) {
-        console.error(error);
+        console.error("Error al guardar el evento:", error);
         alert("Error al guardar el evento");
       }
     }
@@ -112,7 +115,7 @@ export const CalendarBox = ({ isAdmin }: CalendarBoxProps) => {
       // Volver a obtener los eventos actualizados
       await fetchEvents();
     } catch (error) {
-      console.error(error);
+      console.error("Error al eliminar el evento:", error);
       alert("Error al eliminar el evento");
     }
   };
