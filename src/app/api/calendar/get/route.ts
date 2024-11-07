@@ -11,6 +11,8 @@ export async function GET() {
       status: 200,
       headers: {
         "Content-Type": "application/json",
+        // No cachear la respuesta para obtener siempre los datos más recientes
+        "Cache-Control": "no-store",
       },
     });
   } catch (error) {
