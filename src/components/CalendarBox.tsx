@@ -25,9 +25,6 @@ export const CalendarBox = ({ isAdmin }: CalendarBoxProps) => {
       const res = await axios.get("/api/calendar/get");
       const data = res.data;
 
-      // Depurar los datos de eventos
-      console.log("Eventos obtenidos:", data);
-
       // Convertir las fechas a objetos Date
       const eventsWithDate = data.map((event: any) => ({
         ...event,
@@ -56,6 +53,20 @@ export const CalendarBox = ({ isAdmin }: CalendarBoxProps) => {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setNewEvent({ ...newEvent, [name]: value });
+  };
+
+  // Función para invalidar la caché en Vercel y desencadenar un nuevo despliegue
+  const invalidateCache = async () => {
+    try {
+      const webhookUrl = "URL_DEL_WEBHOOK_DE_VERCEL"; // Reemplaza con tu URL de webhook
+
+      // Realizar una solicitud POST al webhook
+      await axios.post(webhookUrl);
+
+      console.log("Cache invalidada y despliegue iniciado.");
+    } catch (error) {
+      console.error("Error al invalidar la caché:", error);
+    }
   };
 
   const handleAddEvent = async () => {
@@ -94,6 +105,9 @@ export const CalendarBox = ({ isAdmin }: CalendarBoxProps) => {
 
         // Volver a obtener los eventos desde la base de datos
         await fetchEvents();
+
+        // Invalida la caché después de añadir el evento
+        await invalidateCache();
       } catch (error) {
         console.error("Error al guardar el evento:", error);
         alert("Error al guardar el evento");
@@ -114,6 +128,9 @@ export const CalendarBox = ({ isAdmin }: CalendarBoxProps) => {
 
       // Volver a obtener los eventos actualizados
       await fetchEvents();
+
+      // Invalida la caché después de eliminar el evento
+      await invalidateCache();
     } catch (error) {
       console.error("Error al eliminar el evento:", error);
       alert("Error al eliminar el evento");
