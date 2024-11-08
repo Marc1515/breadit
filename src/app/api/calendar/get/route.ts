@@ -1,5 +1,7 @@
 import { db } from "@/lib/db";
 
+export const fetchCache = "force-no-store"; // Desactiva la caché globalmente para las solicitudes fetch en esta ruta
+
 export async function GET() {
   try {
     // Obtener todos los eventos (independientemente de si el usuario está autenticado)
@@ -11,8 +13,7 @@ export async function GET() {
       status: 200,
       headers: {
         "Content-Type": "application/json",
-        // No cachear la respuesta para obtener siempre los datos más recientes
-        "Cache-Control": "no-store",
+        "Cache-Control": "no-store", // Desactiva la caché en la respuesta
       },
     });
   } catch (error) {
