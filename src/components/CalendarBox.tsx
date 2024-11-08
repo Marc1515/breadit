@@ -22,7 +22,9 @@ export const CalendarBox = ({ isAdmin }: CalendarBoxProps) => {
   // Función para obtener eventos desde la base de datos usando Axios
   const fetchEvents = async () => {
     try {
-      const res = await axios.get("/api/calendar/get");
+      const res = await axios.get("/api/calendar/get", {
+        headers: { "Cache-Control": "no-store" }, // Desactiva la caché para esta solicitud
+      });
       const data = res.data;
 
       // Convertir las fechas a objetos Date
