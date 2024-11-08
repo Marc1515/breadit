@@ -21,8 +21,11 @@ export const CalendarBox = ({ isAdmin }: CalendarBoxProps) => {
   // Función para obtener eventos desde la base de datos usando fetch
   const fetchEvents = async () => {
     try {
-      // Usar fetch en lugar de Axios y desactivar la caché
-      const res = await fetch("/api/calendar/get", { cache: "no-store" });
+      // Agregar un parámetro de tiempo único para evitar el almacenamiento en caché
+      const timestamp = new Date().getTime();
+      const res = await fetch(`/api/calendar/get?t=${timestamp}`, {
+        cache: "no-store",
+      });
       const data = await res.json();
 
       // Convertir las fechas a objetos Date
