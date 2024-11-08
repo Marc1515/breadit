@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Calendar, dayjsLocalizer } from "react-big-calendar";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import dayjs from "dayjs";
+import axios from "axios";
 
 interface CalendarBoxProps {
   isAdmin: boolean; // Prop para verificar si es administrador
@@ -18,15 +19,11 @@ export const CalendarBox = ({ isAdmin }: CalendarBoxProps) => {
 
   const [error, setError] = useState<string | null>(null); // Estado para manejar mensajes de error
 
-  // Función para obtener eventos desde la base de datos usando fetch
+  // Función para obtener eventos desde la base de datos usando Axios
   const fetchEvents = async () => {
     try {
-      // Agregar un parámetro de tiempo único para evitar el almacenamiento en caché
-      const timestamp = new Date().getTime();
-      const res = await fetch(`/api/calendar/get?t=${timestamp}`, {
-        cache: "no-store",
-      });
-      const data = await res.json();
+      const res = await axios.get("/api/calendar/get");
+      const data = res.data;
 
       // Convertir las fechas a objetos Date
       const eventsWithDate = data.map((event: any) => ({
@@ -37,7 +34,7 @@ export const CalendarBox = ({ isAdmin }: CalendarBoxProps) => {
 
       setEvents(eventsWithDate);
     } catch (error) {
-      console.error("Error al obtener eventos:", error);
+      console.error(error);
       alert("Error al obtener eventos");
     }
   };
@@ -56,20 +53,6 @@ export const CalendarBox = ({ isAdmin }: CalendarBoxProps) => {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setNewEvent({ ...newEvent, [name]: value });
-  };
-
-  // Función para invalidar la caché en Vercel y desencadenar un nuevo despliegue
-  const invalidateCache = async () => {
-    try {
-      const webhookUrl = "URL_DEL_WEBHOOK_DE_VERCEL"; // Reemplaza con tu URL de webhook
-
-      // Realizar una solicitud POST al webhook
-      await fetch(webhookUrl, { method: "POST" });
-
-      console.log("Cache invalidada y despliegue iniciado.");
-    } catch (error) {
-      console.error("Error al invalidar la caché:", error);
-    }
   };
 
   const handleAddEvent = async () => {
@@ -91,15 +74,9 @@ export const CalendarBox = ({ isAdmin }: CalendarBoxProps) => {
         end: end.toISOString(),
       };
 
-      // Enviar el evento a la base de datos usando fetch
+      // Enviar el evento a la base de datos usando Axios
       try {
-        const res = await fetch("/api/calendar/create", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(newEventObj),
-        });
+        const res = await axios.post("/api/calendar/create", newEventObj);
 
         if (res.status !== 200) {
           throw new Error("Failed to save event");
@@ -114,21 +91,18 @@ export const CalendarBox = ({ isAdmin }: CalendarBoxProps) => {
 
         // Volver a obtener los eventos desde la base de datos
         await fetchEvents();
-
-        // Invalida la caché después de añadir el evento
-        await invalidateCache();
       } catch (error) {
-        console.error("Error al guardar el evento:", error);
+        console.error(error);
         alert("Error al guardar el evento");
       }
     }
   };
 
-  // Función para eliminar un evento usando fetch
+  // Función para eliminar un evento usando Axios
   const handleDeleteEvent = async (eventId: string) => {
     try {
-      const res = await fetch(`/api/calendar/delete?id=${eventId}`, {
-        method: "DELETE",
+      const res = await axios.delete(`/api/calendar/delete`, {
+        params: { id: eventId },
       });
 
       if (res.status !== 200) {
@@ -137,11 +111,8 @@ export const CalendarBox = ({ isAdmin }: CalendarBoxProps) => {
 
       // Volver a obtener los eventos actualizados
       await fetchEvents();
-
-      // Invalida la caché después de eliminar el evento
-      await invalidateCache();
     } catch (error) {
-      console.error("Error al eliminar el evento:", error);
+      console.error(error);
       alert("Error al eliminar el evento");
     }
   };
