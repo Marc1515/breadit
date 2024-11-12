@@ -2,7 +2,6 @@ import { db } from "@/lib/db";
 
 export async function GET() {
   try {
-    // Obtener todos los eventos (independientemente de si el usuario está autenticado)
     const events = await db.event.findMany({
       orderBy: { start: "asc" },
     });
@@ -11,6 +10,10 @@ export async function GET() {
       status: 200,
       headers: {
         "Content-Type": "application/json",
+        "Cache-Control":
+          "no-store, no-cache, must-revalidate, proxy-revalidate",
+        Pragma: "no-cache",
+        Expires: "0",
       },
     });
   } catch (error) {
