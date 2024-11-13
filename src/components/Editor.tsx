@@ -70,20 +70,21 @@ const Editor: FC<EditorProps> = ({ subredditId }) => {
               uploader: {
                 async uploadByFile(file: File) {
                   try {
-                    // Intentar subir el archivo
+                    console.log("Intentando subir archivo..."); // Log antes de la carga
                     const [res] = await uploadFiles("imageUploader", {
                       files: [file],
                     });
+
                     if (!res || !res.url) {
                       throw new Error(
                         "La carga fue exitosa, pero falta la URL en la respuesta"
                       );
                     }
-                    console.log("Imagen subida exitosamente:", res.url);
+                    console.log("Imagen subida exitosamente:", res.url); // Log para el éxito
                     return {
                       success: 1,
                       file: {
-                        url: res.url, // Asegúrate de que este sea el campo correcto para la URL
+                        url: res.url, // Verifica que este sea el campo correcto para la URL
                       },
                     };
                   } catch (error) {
