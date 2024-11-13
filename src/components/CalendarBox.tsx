@@ -7,17 +7,15 @@ import dayjs from "dayjs";
 import axios from "axios";
 
 interface CalendarBoxProps {
-  isAdmin: boolean; // Prop para verificar si es administrador
+  isAdmin: boolean;
+  initialEvents: { id: string; title: string; start: Date; end: Date }[];
 }
 
-export const CalendarBox = ({ isAdmin }: CalendarBoxProps) => {
+export const CalendarBox = ({ isAdmin, initialEvents }: CalendarBoxProps) => {
   const localizer = dayjsLocalizer(dayjs);
 
-  const [events, setEvents] = useState<
-    { id: string; title: string; start: Date; end: Date }[]
-  >([]);
-
-  const [error, setError] = useState<string | null>(null); // Estado para manejar mensajes de error
+  // Usa los eventos iniciales del servidor
+  const [events, setEvents] = useState(initialEvents);
 
   // Función para obtener eventos desde la base de datos usando Axios
   const fetchEvents = async () => {
@@ -40,7 +38,6 @@ export const CalendarBox = ({ isAdmin }: CalendarBoxProps) => {
   };
 
   useEffect(() => {
-    // Obtener los eventos al cargar el componente
     fetchEvents();
   }, []);
 
@@ -59,13 +56,10 @@ export const CalendarBox = ({ isAdmin }: CalendarBoxProps) => {
     const start = dayjs(newEvent.start);
     const end = dayjs(newEvent.end);
 
-    // Validar que la fecha de fin sea mayor que la fecha de inicio
     if (end.isBefore(start)) {
-      setError("La fecha de fin no puede ser anterior a la fecha de inicio.");
-      return; // Detener la ejecución si hay un error
+      alert("La fecha de fin no puede ser anterior a la fecha de inicio.");
+      return;
     }
-
-    setError(null); // Limpiar el mensaje de error si las fechas son válidas
 
     if (newEvent.title && newEvent.start && newEvent.end) {
       const newEventObj = {
@@ -74,22 +68,13 @@ export const CalendarBox = ({ isAdmin }: CalendarBoxProps) => {
         end: end.toISOString(),
       };
 
-      // Enviar el evento a la base de datos usando Axios
       try {
         const res = await axios.post("/api/calendar/create", newEventObj);
-
         if (res.status !== 200) {
           throw new Error("Failed to save event");
         }
 
-        // Limpiar los inputs después de agregar el evento
-        setNewEvent({
-          title: "",
-          start: "",
-          end: "",
-        });
-
-        // Volver a obtener los eventos desde la base de datos
+        setNewEvent({ title: "", start: "", end: "" });
         await fetchEvents();
       } catch (error) {
         console.error(error);
@@ -98,18 +83,14 @@ export const CalendarBox = ({ isAdmin }: CalendarBoxProps) => {
     }
   };
 
-  // Función para eliminar un evento usando Axios
   const handleDeleteEvent = async (eventId: string) => {
     try {
       const res = await axios.delete(`/api/calendar/delete`, {
         params: { id: eventId },
       });
-
       if (res.status !== 200) {
         throw new Error("Failed to delete event");
       }
-
-      // Volver a obtener los eventos actualizados
       await fetchEvents();
     } catch (error) {
       console.error(error);
@@ -119,7 +100,6 @@ export const CalendarBox = ({ isAdmin }: CalendarBoxProps) => {
 
   return (
     <div>
-      {/* Mostrar sección de creación de eventos solo si el usuario es administrador */}
       {isAdmin && (
         <div className="flex flex-col">
           <h3>New Event:</h3>
@@ -144,7 +124,6 @@ export const CalendarBox = ({ isAdmin }: CalendarBoxProps) => {
             value={newEvent.end}
             onChange={handleInputChange}
           />
-          {error && <p style={{ color: "red" }}>{error}</p>}
           <button onClick={handleAddEvent}>Add Event</button>
         </div>
       )}
@@ -158,23 +137,17 @@ export const CalendarBox = ({ isAdmin }: CalendarBoxProps) => {
       </div>
 
       {isAdmin && (
-        <>
-          <h3>Lista de eventos:</h3>
-          <ul>
-            {events.map((event) => (
-              <li key={event.id}>
-                <strong>{event.title}</strong> - {event.start.toLocaleString()}{" "}
-                a {event.end.toLocaleString()}
-                <button
-                  onClick={() => handleDeleteEvent(event.id)}
-                  style={{ marginLeft: "10px" }}
-                >
-                  Eliminar
-                </button>
-              </li>
-            ))}
-          </ul>
-        </>
+        <ul>
+          {events.map((event) => (
+            <li key={event.id}>
+              <strong>{event.title}</strong> - {event.start.toLocaleString()} a{" "}
+              {event.end.toLocaleString()}
+              <button onClick={() => handleDeleteEvent(event.id)}>
+                Eliminar
+              </button>
+            </li>
+          ))}
+        </ul>
       )}
     </div>
   );
