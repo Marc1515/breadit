@@ -69,17 +69,33 @@ const Editor: FC<EditorProps> = ({ subredditId }) => {
             config: {
               uploader: {
                 async uploadByFile(file: File) {
-                  // Correctly pass two arguments to uploadFiles
-                  const [res] = await uploadFiles("imageUploader", {
-                    files: [file],
-                  });
-
-                  return {
-                    success: 1,
-                    file: {
-                      url: res.url, // Ensure this is the correct property for the file URL
-                    },
-                  };
+                  try {
+                    // Intentar subir el archivo
+                    const [res] = await uploadFiles("imageUploader", {
+                      files: [file],
+                    });
+                    if (!res || !res.url) {
+                      throw new Error(
+                        "La carga fue exitosa, pero falta la URL en la respuesta"
+                      );
+                    }
+                    console.log("Imagen subida exitosamente:", res.url);
+                    return {
+                      success: 1,
+                      file: {
+                        url: res.url, // Asegúrate de que este sea el campo correcto para la URL
+                      },
+                    };
+                  } catch (error) {
+                    console.error("Error al subir el archivo:", error);
+                    toast({
+                      title: "Error al subir la imagen",
+                      description:
+                        "La imagen fue subida, pero hubo un problema al actualizar la interfaz.",
+                      variant: "destructive",
+                    });
+                    return { success: 0 };
+                  }
                 },
               },
             },
@@ -98,7 +114,7 @@ const Editor: FC<EditorProps> = ({ subredditId }) => {
     if (Object.keys(errors).length) {
       for (const [_key, value] of Object.entries(errors)) {
         toast({
-          title: "Something went wrong",
+          title: "Algo salió mal",
           description: (value as { message: string }).message,
           variant: "destructive",
         });
@@ -143,20 +159,20 @@ const Editor: FC<EditorProps> = ({ subredditId }) => {
     },
     onError: () => {
       return toast({
-        title: "Something went wrong",
-        description: "Your post was not published, please try agin later",
+        title: "Algo salió mal",
+        description:
+          "Tu publicación no fue publicada, por favor intenta de nuevo.",
         variant: "destructive",
       });
     },
-
     onSuccess: () => {
-      const newPAthname = pathname.split("/").slice(0, -1).join("/");
-      router.push(newPAthname);
+      const newPathname = pathname.split("/").slice(0, -1).join("/");
+      router.push(newPathname);
 
       router.refresh();
 
       return toast({
-        description: "Your post has been published.",
+        description: "Tu publicación ha sido publicada.",
       });
     },
   });
@@ -194,7 +210,7 @@ const Editor: FC<EditorProps> = ({ subredditId }) => {
               _titleRef.current = e;
             }}
             {...rest}
-            placeholder="Title"
+            placeholder="Título"
             className="w-full resize-none appearance-none overflow-hidden bg-transparent text-5xl font-bold focus:outline-none"
           />
           <div id="editor" className="min-h-[500px]" />
