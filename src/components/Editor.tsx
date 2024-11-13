@@ -70,12 +70,26 @@ const Editor: FC<EditorProps> = ({ subredditId }) => {
               uploader: {
                 async uploadByFile(file: File) {
                   try {
-                    console.log("Intentando subir archivo..."); // Log antes de la carga
-                    const [res] = await uploadFiles("imageUploader", {
-                      files: [file],
+                    console.log("Intentando subir archivo...");
+
+                    // Timeout manual para depurar si la solicitud se bloquea
+                    const timeout = new Promise((_, reject) => {
+                      setTimeout(
+                        () =>
+                          reject(
+                            new Error("Timeout al intentar subir archivo")
+                          ),
+                        10000
+                      ); // 10 segundos
                     });
 
-                    console.log("Respuesta de uploadFiles:", res); // Log después de la carga
+                    // Ejecutar `uploadFiles` con el timeout
+                    const [res]: any = await Promise.race([
+                      uploadFiles("imageUploader", { files: [file] }),
+                      timeout,
+                    ]);
+
+                    console.log("Respuesta de uploadFiles:", res);
 
                     if (!res || !res.url) {
                       throw new Error(
@@ -83,18 +97,20 @@ const Editor: FC<EditorProps> = ({ subredditId }) => {
                       );
                     }
 
-                    console.log("Imagen subida exitosamente:", res.url); // Log si la carga es exitosa
+                    console.log("Imagen subida exitosamente:", res.url);
                     return {
                       success: 1,
                       file: {
-                        url: res.url, // Verifica que este sea el campo correcto para la URL
+                        url: res.url,
                       },
                     };
                   } catch (error) {
-                    console.error("Error al subir el archivo:", error);
+                    const errorMessage = (error as Error).message; // Convertir 'error' a tipo 'Error'
+                    console.error("Error al subir el archivo:", errorMessage);
                     toast({
                       title: "Error al subir la imagen",
                       description:
+                        errorMessage ||
                         "La imagen fue subida, pero hubo un problema al actualizar la interfaz.",
                       variant: "destructive",
                     });
