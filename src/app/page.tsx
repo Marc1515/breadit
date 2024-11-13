@@ -10,9 +10,9 @@ import Link from "next/link";
 // Función para convertir los guiones en espacios y capitalizar la primera letra de cada palabra
 function formatSubredditName(name: string) {
   return name
-    .split("-")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ");
+    .split("-") // Dividir el nombre en palabras separadas por guiones
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1)) // Capitalizar la primera letra de cada palabra
+    .join(" "); // Unir las palabras con un espacio
 }
 
 export const dynamic = "force-dynamic";
@@ -37,19 +37,6 @@ export default async function Home() {
       createdAt: "desc",
     },
   });
-
-  // Obtén los eventos en el servidor
-  const initialEvents = await db.event
-    .findMany({
-      orderBy: { start: "asc" },
-    })
-    .then((events) =>
-      events.map((event) => ({
-        ...event,
-        start: new Date(event.start),
-        end: new Date(event.end),
-      }))
-    );
 
   return (
     <>
@@ -95,6 +82,7 @@ export default async function Home() {
                       className="text-blue-600 hover:underline"
                       href={`/r/${subreddit.name}`}
                     >
+                      {/* Aplicar el formato al nombre del subreddit */}
                       {formatSubredditName(subreddit.name)}
                     </Link>
                   </li>
@@ -105,10 +93,7 @@ export default async function Home() {
           <div className="mt-4">
             <h2 className="font-semibold text-lg px-6 py-3">Calendar</h2>
             <dl className="-my-3 divide-y divide-gray-100 px-6 py-4 text-sm leading-6">
-              <CalendarBox
-                isAdmin={isAdministrator?.isAdmin ?? false}
-                initialEvents={initialEvents}
-              />
+              <CalendarBox isAdmin={isAdministrator?.isAdmin ?? false} />
             </dl>
           </div>
         </div>
