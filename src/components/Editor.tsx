@@ -75,12 +75,15 @@ const Editor: FC<EditorProps> = ({ subredditId }) => {
                       files: [file],
                     });
 
+                    console.log("Respuesta de uploadFiles:", res); // Log después de la carga
+
                     if (!res || !res.url) {
                       throw new Error(
                         "La carga fue exitosa, pero falta la URL en la respuesta"
                       );
                     }
-                    console.log("Imagen subida exitosamente:", res.url); // Log para el éxito
+
+                    console.log("Imagen subida exitosamente:", res.url); // Log si la carga es exitosa
                     return {
                       success: 1,
                       file: {
