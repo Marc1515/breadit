@@ -5,14 +5,14 @@ import { z } from "zod";
 
 export async function POST(req: Request) {
   try {
-    // Añadir encabezados CORS
     const headers = new Headers();
     headers.append(
       "Access-Control-Allow-Origin",
       "https://breadit.marcespana.com"
-    ); // Cambia esto por tu dominio
+    );
     headers.append("Access-Control-Allow-Methods", "POST, OPTIONS");
     headers.append("Access-Control-Allow-Headers", "Content-Type");
+    headers.append("Access-Control-Allow-Credentials", "true"); // Añadir este encabezado si usas cookies
 
     const body = await req.json();
     const { title, content, subredditId } = PostValidator.parse(body);
@@ -22,7 +22,6 @@ export async function POST(req: Request) {
       return new Response("Unauthorized", { status: 401, headers });
     }
 
-    // Verificar si el usuario está suscrito al subreddit
     const subscription = await db.subscription.findFirst({
       where: {
         subredditId,
@@ -49,7 +48,8 @@ export async function POST(req: Request) {
     headers.append(
       "Access-Control-Allow-Origin",
       "https://breadit.marcespana.com"
-    ); // Cambia esto por tu dominio
+    );
+    headers.append("Access-Control-Allow-Credentials", "true");
 
     if (error instanceof z.ZodError) {
       return new Response(error.message, { status: 400, headers });
@@ -63,14 +63,14 @@ export async function POST(req: Request) {
 }
 
 export async function OPTIONS() {
-  // Manejar la solicitud preflight con los encabezados CORS
   const headers = new Headers();
   headers.append(
     "Access-Control-Allow-Origin",
     "https://breadit.marcespana.com"
-  ); // Cambia esto por tu dominio
+  );
   headers.append("Access-Control-Allow-Methods", "POST, OPTIONS");
   headers.append("Access-Control-Allow-Headers", "Content-Type");
+  headers.append("Access-Control-Allow-Credentials", "true");
 
   return new Response(null, { headers });
 }
