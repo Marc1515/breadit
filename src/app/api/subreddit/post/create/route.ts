@@ -9,7 +9,7 @@ export async function POST(req: Request) {
     const headers = new Headers();
     headers.append(
       "Access-Control-Allow-Origin",
-      "https:breadit.marcespana.com"
+      "https://breadit.marcespana.com"
     ); // Cambia esto por tu dominio
     headers.append("Access-Control-Allow-Methods", "POST, OPTIONS");
     headers.append("Access-Control-Allow-Headers", "Content-Type");
@@ -48,7 +48,7 @@ export async function POST(req: Request) {
     const headers = new Headers();
     headers.append(
       "Access-Control-Allow-Origin",
-      "https:breadit.marcespana.com"
+      "https://breadit.marcespana.com"
     ); // Cambia esto por tu dominio
 
     if (error instanceof z.ZodError) {
@@ -65,7 +65,10 @@ export async function POST(req: Request) {
 export async function OPTIONS() {
   // Manejar la solicitud preflight con los encabezados CORS
   const headers = new Headers();
-  headers.append("Access-Control-Allow-Origin", "https:breadit.marcespana.com"); // Cambia esto por tu dominio
+  headers.append(
+    "Access-Control-Allow-Origin",
+    "https://breadit.marcespana.com"
+  ); // Cambia esto por tu dominio
   headers.append("Access-Control-Allow-Methods", "POST, OPTIONS");
   headers.append("Access-Control-Allow-Headers", "Content-Type");
 
