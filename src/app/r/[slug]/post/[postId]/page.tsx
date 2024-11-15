@@ -20,9 +20,6 @@ interface SubRedditPostPageProps {
   };
 }
 
-export const dynamic = "force-dynamic";
-export const fetchCache = "force-no-store";
-
 const SubRedditPostPage = async ({ params }: SubRedditPostPageProps) => {
   const session = await getAuthSession();
 
