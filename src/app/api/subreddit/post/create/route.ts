@@ -5,23 +5,17 @@ import { z } from "zod";
 
 export async function POST(req: Request) {
   try {
-    const headers = new Headers();
-    headers.append(
-      "Access-Control-Allow-Origin",
-      "https://breadit.marcespana.com"
-    );
-    headers.append("Access-Control-Allow-Methods", "POST, OPTIONS");
-    headers.append("Access-Control-Allow-Headers", "Content-Type");
-    headers.append("Access-Control-Allow-Credentials", "true"); // Añadir este encabezado si usas cookies
-
     const body = await req.json();
+
     const { title, content, subredditId } = PostValidator.parse(body);
 
     const session = await getAuthSession();
+
     if (!session?.user) {
-      return new Response("Unauthorized", { status: 401, headers });
+      return new Response("Unauthorized", { status: 401 });
     }
 
+    // verify user is subscribed to passed subreddit id
     const subscription = await db.subscription.findFirst({
       where: {
         subredditId,
@@ -30,7 +24,7 @@ export async function POST(req: Request) {
     });
 
     if (!subscription) {
-      return new Response("Subscribe to post", { status: 403, headers });
+      return new Response("Subscribe to post", { status: 403 });
     }
 
     await db.post.create({
@@ -42,35 +36,15 @@ export async function POST(req: Request) {
       },
     });
 
-    return new Response("OK", { headers });
+    return new Response("OK");
   } catch (error) {
-    const headers = new Headers();
-    headers.append(
-      "Access-Control-Allow-Origin",
-      "https://breadit.marcespana.com"
-    );
-    headers.append("Access-Control-Allow-Credentials", "true");
-
     if (error instanceof z.ZodError) {
-      return new Response(error.message, { status: 400, headers });
+      return new Response(error.message, { status: 400 });
     }
 
     return new Response(
       "Could not post to subreddit at this time. Please try later",
-      { status: 500, headers }
+      { status: 500 }
     );
   }
-}
-
-export async function OPTIONS() {
-  const headers = new Headers();
-  headers.append(
-    "Access-Control-Allow-Origin",
-    "https://breadit.marcespana.com"
-  );
-  headers.append("Access-Control-Allow-Methods", "POST, OPTIONS");
-  headers.append("Access-Control-Allow-Headers", "Content-Type");
-  headers.append("Access-Control-Allow-Credentials", "true");
-
-  return new Response(null, { headers });
 }
