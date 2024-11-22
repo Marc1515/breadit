@@ -72,23 +72,27 @@ const Editor: FC<EditorProps> = ({ subredditId }) => {
                   try {
                     console.log("Intentando subir archivo...");
 
-                    // Timeout manual para depurar si la solicitud se bloquea
+                    // Seguimiento del tiempo de subida
+                    console.time("uploadTime");
+
+                    // Timeout manual
                     const timeout = new Promise((_, reject) => {
                       setTimeout(
                         () =>
                           reject(
                             new Error("Timeout al intentar subir archivo")
                           ),
-                        20000
-                      ); // 20 segundos
+                        30000 // 30 segundos
+                      );
                     });
 
-                    // Ejecutar `uploadFiles` con el timeout
+                    // Ejecutar uploadFiles con timeout
                     const [res]: any = await Promise.race([
                       uploadFiles("imageUploader", { files: [file] }),
                       timeout,
                     ]);
 
+                    console.timeEnd("uploadTime");
                     console.log("Respuesta de uploadFiles:", res);
 
                     if (!res || !res.url) {
@@ -105,26 +109,15 @@ const Editor: FC<EditorProps> = ({ subredditId }) => {
                       },
                     };
                   } catch (error) {
-                    if (error instanceof Error) {
-                      console.error(
-                        "Error al subir el archivo:",
-                        error.message
-                      );
-                      toast({
-                        title: "Error al subir la imagen",
-                        description:
-                          error.message ||
-                          "Ha ocurrido un problema desconocido.",
-                        variant: "destructive",
-                      });
-                    } else {
-                      console.error("Error desconocido:", error);
-                      toast({
-                        title: "Error al subir la imagen",
-                        description: "Ha ocurrido un problema desconocido.",
-                        variant: "destructive",
-                      });
-                    }
+                    console.error("Error durante la subida:", error);
+                    toast({
+                      title: "Error al subir la imagen",
+                      description:
+                        error instanceof Error
+                          ? error.message
+                          : "Ocurrió un problema desconocido.",
+                      variant: "destructive",
+                    });
                     return { success: 0 };
                   }
                 },
