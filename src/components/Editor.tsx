@@ -79,8 +79,8 @@ const Editor: FC<EditorProps> = ({ subredditId }) => {
                           reject(
                             new Error("Timeout al intentar subir archivo")
                           ),
-                        10000
-                      ); // 10 segundos
+                        20000
+                      ); // 20 segundos
                     });
 
                     // Ejecutar `uploadFiles` con el timeout
@@ -105,15 +105,26 @@ const Editor: FC<EditorProps> = ({ subredditId }) => {
                       },
                     };
                   } catch (error) {
-                    const errorMessage = (error as Error).message; // Convertir 'error' a tipo 'Error'
-                    console.error("Error al subir el archivo:", errorMessage);
-                    toast({
-                      title: "Error al subir la imagen",
-                      description:
-                        errorMessage ||
-                        "La imagen fue subida, pero hubo un problema al actualizar la interfaz.",
-                      variant: "destructive",
-                    });
+                    if (error instanceof Error) {
+                      console.error(
+                        "Error al subir el archivo:",
+                        error.message
+                      );
+                      toast({
+                        title: "Error al subir la imagen",
+                        description:
+                          error.message ||
+                          "Ha ocurrido un problema desconocido.",
+                        variant: "destructive",
+                      });
+                    } else {
+                      console.error("Error desconocido:", error);
+                      toast({
+                        title: "Error al subir la imagen",
+                        description: "Ha ocurrido un problema desconocido.",
+                        variant: "destructive",
+                      });
+                    }
                     return { success: 0 };
                   }
                 },
