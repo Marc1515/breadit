@@ -72,21 +72,32 @@ const Editor: FC<EditorProps> = ({ subredditId }) => {
                   try {
                     console.log("Iniciando subida...");
 
-                    const [res]: any = await uploadFiles("imageUploader", {
+                    const response = await uploadFiles("imageUploader", {
                       files: [file],
+                      headers: {
+                        // Encabezados personalizados para resolver problemas de CORS o de red
+                        "Access-Control-Allow-Origin": "*", // Permitir cualquier origen
+                        "Access-Control-Allow-Methods":
+                          "GET, POST, PUT, DELETE, OPTIONS",
+                        "Access-Control-Allow-Headers":
+                          "Content-Type, Authorization",
+                      },
                     });
 
-                    console.log("Respuesta de UploadThing:", res);
+                    console.log("Respuesta de UploadThing:", response);
 
-                    if (!res || !res.url) {
+                    if (!response || !response[0]?.url) {
                       throw new Error("Falta la URL en la respuesta");
                     }
 
-                    console.log("Subida exitosa. URL del archivo:", res.url);
+                    console.log(
+                      "Archivo subido exitosamente:",
+                      response[0].url
+                    );
                     return {
                       success: 1,
                       file: {
-                        url: res.url,
+                        url: response[0].url,
                       },
                     };
                   } catch (error) {
