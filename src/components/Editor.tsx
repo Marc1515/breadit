@@ -70,38 +70,19 @@ const Editor: FC<EditorProps> = ({ subredditId }) => {
               uploader: {
                 async uploadByFile(file: File) {
                   try {
-                    console.log("Intentando subir archivo...");
+                    console.log("Iniciando subida...");
 
-                    // Seguimiento del tiempo de subida
-                    console.time("uploadTime");
-
-                    // Timeout manual
-                    const timeout = new Promise((_, reject) => {
-                      setTimeout(
-                        () =>
-                          reject(
-                            new Error("Timeout al intentar subir archivo")
-                          ),
-                        30000 // 30 segundos
-                      );
+                    const [res]: any = await uploadFiles("imageUploader", {
+                      files: [file],
                     });
 
-                    // Ejecutar uploadFiles con timeout
-                    const [res]: any = await Promise.race([
-                      uploadFiles("imageUploader", { files: [file] }),
-                      timeout,
-                    ]);
-
-                    console.timeEnd("uploadTime");
-                    console.log("Respuesta de uploadFiles:", res);
+                    console.log("Respuesta de UploadThing:", res);
 
                     if (!res || !res.url) {
-                      throw new Error(
-                        "La carga fue exitosa, pero falta la URL en la respuesta"
-                      );
+                      throw new Error("Falta la URL en la respuesta");
                     }
 
-                    console.log("Imagen subida exitosamente:", res.url);
+                    console.log("Subida exitosa. URL del archivo:", res.url);
                     return {
                       success: 1,
                       file: {
@@ -110,14 +91,6 @@ const Editor: FC<EditorProps> = ({ subredditId }) => {
                     };
                   } catch (error) {
                     console.error("Error durante la subida:", error);
-                    toast({
-                      title: "Error al subir la imagen",
-                      description:
-                        error instanceof Error
-                          ? error.message
-                          : "Ocurrió un problema desconocido.",
-                      variant: "destructive",
-                    });
                     return { success: 0 };
                   }
                 },
