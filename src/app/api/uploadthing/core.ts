@@ -1,34 +1,41 @@
 import { createUploadthing, type FileRouter } from "uploadthing/next";
 import { UploadThingError } from "uploadthing/server";
 
+// Crear instancia de UploadThing
 const f = createUploadthing();
 
+// Función de autenticación ficticia
 const auth = (req: Request) => ({ id: "fakeId" }); // Fake auth function
 
-// FileRouter for your app, can contain multiple FileRoutes
+// Configurar FileRouter con slug 'imageUploader'
 export const ourFileRouter = {
-  // Define as many FileRoutes as you like, each with a unique routeSlug
   imageUploader: f({ image: { maxFileSize: "4MB" } })
-    // Set permissions and file types for this FileRoute
+    // Middleware para verificar autenticación y permisos
     .middleware(async ({ req }) => {
-      // This code runs on your server before upload
       const user = await auth(req);
 
-      // If you throw, the user will not be able to upload
-      if (!user) throw new UploadThingError("Unauthorized");
+      if (!user) {
+        console.error("Error: Usuario no autorizado");
+        throw new UploadThingError("Unauthorized");
+      }
 
-      // Whatever is returned here is accessible in onUploadComplete as `metadata`
+      console.log("Usuario autenticado con éxito:", user.id);
+
       return { userId: user.id };
     })
+    // Callback que se ejecuta después de la subida
     .onUploadComplete(async ({ metadata, file }) => {
-      // This code RUNS ON YOUR SERVER after upload
-      console.log("Upload complete for userId:", metadata.userId);
+      console.log("Subida completada para userId:", metadata.userId);
+      console.log("URL del archivo subido:", file.url);
 
-      console.log("file url", file.url);
-
-      // !!! Whatever is returned here is sent to the clientside `onClientUploadComplete` callback
+      // Retornar datos que se usarán en el cliente
       return { uploadedBy: metadata.userId };
     }),
 } satisfies FileRouter;
 
 export type OurFileRouter = typeof ourFileRouter;
+
+// Configurar URL explícita para UploadThing
+export const config = {
+  callbackUrl: process.env.UPLOADTHING_URL || "https://breadit.marcespana.com",
+};
