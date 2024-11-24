@@ -25,10 +25,19 @@ export const ourFileRouter = {
     })
     // Callback que se ejecuta después de la subida
     .onUploadComplete(async ({ metadata, file }) => {
-      console.log("Subida completada para userId:", metadata.userId);
-      console.log("URL del archivo subido:", file.url);
+      console.log("Callback recibido por UploadThing:");
+      console.log("Metadata:", metadata);
+      console.log("Archivo subido:", file);
 
-      // Retornar datos que se usarán en el cliente
+      if (!file.url) {
+        console.error("Error: la URL del archivo no está presente.");
+        throw new Error("La URL del archivo subido no está disponible.");
+      }
+
+      console.log(
+        "Subida completada exitosamente para el usuario:",
+        metadata.userId
+      );
       return { uploadedBy: metadata.userId };
     }),
 } satisfies FileRouter;
