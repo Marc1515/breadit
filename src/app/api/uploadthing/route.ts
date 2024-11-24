@@ -7,6 +7,6 @@ export const { GET, POST } = createRouteHandler({
 
   // Configuración personalizada para UploadThing
   config: {
-    callbackUrl: process.env.UPLOADTHING_URL,
+    callbackUrl: "https://breadit.marcespana.com",
   },
 });
