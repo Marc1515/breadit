@@ -34,8 +34,3 @@ export const ourFileRouter = {
 } satisfies FileRouter;
 
 export type OurFileRouter = typeof ourFileRouter;
-
-// Configurar URL explícita para UploadThing
-export const config = {
-  callbackUrl: process.env.UPLOADTHING_URL || "https://breadit.marcespana.com",
-};
