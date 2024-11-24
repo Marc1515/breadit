@@ -1,11 +1,14 @@
 import { createRouteHandler } from "uploadthing/next";
-
 import { ourFileRouter } from "./core";
 
 // Export routes for Next App Router
 export const { GET, POST } = createRouteHandler({
   router: ourFileRouter,
 
-  // Apply an (optional) custom config:
-  // config: { ... },
+  // Configuración personalizada para UploadThing
+  config: {
+    callbackUrl:
+      process.env.UPLOADTHING_URL || "https://breadit.marcespana.com",
+    logLevel: "Info", // Puedes cambiar a "debug" para más información en los logs.
+  },
 });
