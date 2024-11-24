@@ -9,6 +9,5 @@ export const { GET, POST } = createRouteHandler({
   config: {
     callbackUrl:
       process.env.UPLOADTHING_URL || "https://breadit.marcespana.com",
-    logLevel: "Info", // Puedes cambiar a "debug" para más información en los logs.
   },
 });
