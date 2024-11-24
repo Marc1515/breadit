@@ -38,8 +38,15 @@ export const ourFileRouter = {
         "Subida completada exitosamente para el usuario:",
         metadata.userId
       );
+
+      // Si necesitas guardar la URL del archivo o notificar, hazlo aquí
       return { uploadedBy: metadata.userId };
     }),
 } satisfies FileRouter;
 
 export type OurFileRouter = typeof ourFileRouter;
+
+// Configuración explícita del callbackUrl
+export const config = {
+  callbackUrl: process.env.UPLOADTHING_URL || "https://breadit.marcespana.com",
+};
