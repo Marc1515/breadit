@@ -21,12 +21,19 @@ export const ourFileRouter = {
       return { userId: user.id };
     })
     .onUploadComplete(async ({ metadata, file }) => {
-      // This code RUNS ON YOUR SERVER after upload
-      console.log("Upload complete for userId:", metadata.userId);
+      console.log("=== Upload Completed ===");
+      console.log("Metadata:", metadata);
+      console.log("File details:", file);
 
-      console.log("file url", file.url);
+      if (!file.url) {
+        console.error("Error: La URL del archivo no está disponible.");
+        throw new Error("La URL del archivo subido no está disponible.");
+      }
 
-      // !!! Whatever is returned here is sent to the clientside `onClientUploadComplete` callback
+      console.log(
+        "Upload completado exitosamente para el usuario:",
+        metadata.userId
+      );
       return { uploadedBy: metadata.userId };
     }),
 } satisfies FileRouter;
