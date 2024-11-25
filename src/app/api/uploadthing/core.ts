@@ -1,52 +1,34 @@
 import { createUploadthing, type FileRouter } from "uploadthing/next";
 import { UploadThingError } from "uploadthing/server";
 
-// Crear instancia de UploadThing
 const f = createUploadthing();
 
-// Función de autenticación ficticia
 const auth = (req: Request) => ({ id: "fakeId" }); // Fake auth function
 
-// Configurar FileRouter con slug 'imageUploader'
+// FileRouter for your app, can contain multiple FileRoutes
 export const ourFileRouter = {
+  // Define as many FileRoutes as you like, each with a unique routeSlug
   imageUploader: f({ image: { maxFileSize: "4MB" } })
-    // Middleware para verificar autenticación y permisos
+    // Set permissions and file types for this FileRoute
     .middleware(async ({ req }) => {
+      // This code runs on your server before upload
       const user = await auth(req);
 
-      if (!user) {
-        console.error("Error: Usuario no autorizado");
-        throw new UploadThingError("Unauthorized");
-      }
+      // If you throw, the user will not be able to upload
+      if (!user) throw new UploadThingError("Unauthorized");
 
-      console.log("Usuario autenticado con éxito:", user.id);
-
+      // Whatever is returned here is accessible in onUploadComplete as `metadata`
       return { userId: user.id };
     })
-    // Callback que se ejecuta después de la subida
     .onUploadComplete(async ({ metadata, file }) => {
-      console.log("Callback recibido por UploadThing:");
-      console.log("Metadata:", metadata);
-      console.log("Archivo subido:", file);
+      // This code RUNS ON YOUR SERVER after upload
+      console.log("Upload complete for userId:", metadata.userId);
 
-      if (!file.url) {
-        console.error("Error: la URL del archivo no está presente.");
-        throw new Error("La URL del archivo subido no está disponible.");
-      }
+      console.log("file url", file.url);
 
-      console.log(
-        "Subida completada exitosamente para el usuario:",
-        metadata.userId
-      );
-
-      // Si necesitas guardar la URL del archivo o notificar, hazlo aquí
+      // !!! Whatever is returned here is sent to the clientside `onClientUploadComplete` callback
       return { uploadedBy: metadata.userId };
     }),
 } satisfies FileRouter;
 
 export type OurFileRouter = typeof ourFileRouter;
-
-// Configuración explícita del callbackUrl
-export const config = {
-  callbackUrl: process.env.UPLOADTHING_URL || "https://breadit.marcespana.com",
-};
