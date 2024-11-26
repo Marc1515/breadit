@@ -119,6 +119,8 @@ model Comment {
 
   votes     CommentVote[]
   commentId String?
+
+  audioUrl String? // Ruta al archivo de audio (opcional)
 }
 
 model Vote {
