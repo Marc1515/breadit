@@ -6,7 +6,7 @@ import { CommentRequest } from "@/lib/validators/comment";
 import { Comment, CommentVote, User } from "@prisma/client";
 import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
-import { MessageSquare } from "lucide-react";
+import { MessageSquare, Trash2 } from "lucide-react"; // Añadido ícono para el botón "Delete"
 import { useRouter } from "next/navigation";
 import { FC, useRef, useState } from "react";
 import CommentVotes from "../CommentVotes";
@@ -27,6 +27,7 @@ interface PostCommentProps {
   votesAmt: number;
   currentVote: CommentVote | undefined;
   postId: string;
+  isAdmin: boolean; // Nueva prop para saber si el usuario es admin
 }
 
 const PostComment: FC<PostCommentProps> = ({
@@ -34,6 +35,7 @@ const PostComment: FC<PostCommentProps> = ({
   votesAmt,
   currentVote,
   postId,
+  isAdmin,
 }) => {
   const { data: session } = useSession();
   const [isReplying, setIsReplying] = useState<boolean>(false);
@@ -54,7 +56,6 @@ const PostComment: FC<PostCommentProps> = ({
       );
       return data;
     },
-
     onError: () => {
       return toast({
         title: "Something went wrong.",
@@ -65,6 +66,31 @@ const PostComment: FC<PostCommentProps> = ({
     onSuccess: () => {
       router.refresh();
       setIsReplying(false);
+    },
+  });
+
+  // Función para eliminar comentarios
+  const { mutate: deleteComment, isLoading: isDeleting } = useMutation({
+    mutationFn: async () => {
+      const { data } = await axios.delete(
+        `/api/subreddit/post/comment/delete?id=${comment.id}`
+      );
+      return data;
+    },
+    onError: () => {
+      return toast({
+        title: "Error deleting comment",
+        description: "Could not delete comment. Please try again.",
+        variant: "destructive",
+      });
+    },
+    onSuccess: () => {
+      router.refresh();
+      return toast({
+        title: "Comment deleted",
+        description: "Your comment has been successfully deleted.",
+        variant: "default",
+      });
     },
   });
 
@@ -116,6 +142,7 @@ const PostComment: FC<PostCommentProps> = ({
           currentVote={currentVote}
         />
 
+        {/* Botón para responder */}
         <Button
           onClick={() => {
             if (!session) return router.push("/sign-in");
@@ -127,52 +154,63 @@ const PostComment: FC<PostCommentProps> = ({
           <MessageSquare className="h-4 w-4 mr-1.5" />
           Reply
         </Button>
+
+        {/* Botón para eliminar comentario */}
+        {(session?.user.id === comment.authorId || isAdmin) && (
+          <Button
+            onClick={() => deleteComment()}
+            variant="destructive"
+            className="bg-red-400"
+            size="xs"
+            isLoading={isDeleting}
+          >
+            <Trash2 className="h-4 w-4 mr-1.5" />
+            Delete
+          </Button>
+        )}
       </div>
 
-      {isReplying ? (
-        <div className="grid w-full gap-1.5">
+      {isReplying && (
+        <div className="grid w-full gap-1.5 mt-4">
           <Label htmlFor="comment">Your comment</Label>
-          <div className="mt-2">
-            <Textarea
-              onFocus={(e) =>
-                e.currentTarget.setSelectionRange(
-                  e.currentTarget.value.length,
-                  e.currentTarget.value.length
-                )
-              }
-              autoFocus
-              id="comment"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              rows={1}
-              placeholder="What are your thoughts?"
-            />
-
-            <div className="mt-2 flex justify-end gap-2">
-              <Button
-                tabIndex={-1}
-                variant="subtle"
-                onClick={() => setIsReplying(false)}
-              >
-                Cancel
-              </Button>
-              <Button
-                isLoading={isLoading}
-                onClick={() => {
-                  if (!input) return;
-                  postComment({
-                    postId,
-                    text: input,
-                    replyToId: comment.replyToId ?? comment.id, // default to top-level comment
-                  });
-                }}
-              >
-                Post
-              </Button>
-            </div>
+          <Textarea
+            onFocus={(e) =>
+              e.currentTarget.setSelectionRange(
+                e.currentTarget.value.length,
+                e.currentTarget.value.length
+              )
+            }
+            autoFocus
+            id="comment"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            rows={1}
+            placeholder="What are your thoughts?"
+          />
+          <div className="mt-2 flex justify-end gap-2">
+            <Button
+              tabIndex={-1}
+              variant="subtle"
+              onClick={() => setIsReplying(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              isLoading={isLoading}
+              onClick={() => {
+                if (!input) return;
+                postComment({
+                  postId,
+                  text: input,
+                  replyToId: comment.replyToId ?? comment.id,
+                });
+              }}
+            >
+              Post
+            </Button>
           </div>
         </div>
-      ) : null}
+      )}
     </div>
   );
 };
