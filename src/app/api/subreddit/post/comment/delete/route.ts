@@ -1,6 +1,8 @@
 import { getAuthSession } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { NextResponse } from "next/server";
+import fs from "fs";
+import path from "path";
 
 export async function DELETE(req: Request) {
   try {
@@ -35,7 +37,7 @@ export async function DELETE(req: Request) {
     // Verificar si el comentario pertenece al usuario o si es administrador
     const comment = await db.comment.findUnique({
       where: { id: commentId },
-      select: { authorId: true },
+      select: { authorId: true, audioUrl: true },
     });
 
     if (!comment) {
@@ -46,7 +48,20 @@ export async function DELETE(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
-    // Eliminar el comentario
+    // Eliminar el archivo de audio si existe
+    if (comment.audioUrl) {
+      const audioPath = path.join(process.cwd(), "public", comment.audioUrl);
+
+      try {
+        if (fs.existsSync(audioPath)) {
+          fs.unlinkSync(audioPath);
+        }
+      } catch (err) {
+        console.error("Error deleting audio file:", err);
+      }
+    }
+
+    // Eliminar el comentario de la base de datos
     await db.comment.delete({
       where: { id: commentId },
     });
