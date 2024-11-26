@@ -68,6 +68,16 @@ const PostComment: FC<PostCommentProps> = ({
     },
   });
 
+  // Determina la URL base dependiendo del entorno
+  const getAudioUrl = (audioUrl: string) => {
+    const baseUrl =
+      process.env.NODE_ENV === "production"
+        ? "https://breadit.marcespana.com"
+        : "http://localhost:3000";
+
+    return audioUrl.startsWith("http") ? audioUrl : `${baseUrl}${audioUrl}`;
+  };
+
   return (
     <div ref={commentRef} className="flex flex-col">
       <div className="flex items-center">
@@ -94,14 +104,7 @@ const PostComment: FC<PostCommentProps> = ({
       {/* Reproductor de audio si el comentario tiene un audio */}
       {comment.audioUrl && (
         <audio controls className="mt-2">
-          <source
-            src={
-              comment.audioUrl.startsWith("http")
-                ? comment.audioUrl // Si ya es una URL absoluta
-                : `https://breadit.marcespana.com${comment.audioUrl}` // Construir URL absoluta en producción
-            }
-            type="audio/wav"
-          />
+          <source src={getAudioUrl(comment.audioUrl)} type="audio/wav" />
           Your browser does not support the audio element.
         </audio>
       )}
