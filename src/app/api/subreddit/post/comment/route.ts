@@ -1,3 +1,5 @@
+export const runtime = "nodejs"; // Reemplaza `config` con `runtime`
+
 import { NextResponse } from "next/server";
 import { IncomingForm } from "formidable";
 import fs from "fs";
@@ -8,14 +10,7 @@ import { CommentValidator } from "@/lib/validators/comment";
 import { Readable } from "stream";
 import type { IncomingMessage } from "http";
 
-// Configuración para desactivar el bodyParser de Next.js
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
-
-// Función para envolver el objeto Request de Next.js
+// Función para convertir el Request a un objeto IncomingMessage
 function convertRequestToIncomingMessage(req: Request): IncomingMessage {
   const body = req.body as ReadableStream<Uint8Array>;
   const reader = body.getReader();
@@ -36,7 +31,6 @@ function convertRequestToIncomingMessage(req: Request): IncomingMessage {
     headers[key] = value;
   });
 
-  // Crear un objeto completo de tipo IncomingMessage
   return Object.assign(stream, {
     headers,
     method: req.method,
@@ -44,8 +38,8 @@ function convertRequestToIncomingMessage(req: Request): IncomingMessage {
     httpVersion: "1.1",
     httpVersionMajor: 1,
     httpVersionMinor: 1,
-    connection: {}, // Simular una conexión vacía
-    socket: {}, // Simular un socket vacío
+    connection: {},
+    socket: {},
     aborted: false,
   }) as IncomingMessage;
 }
@@ -59,13 +53,12 @@ export async function POST(req: Request) {
     }
 
     const form = new IncomingForm({
-      uploadDir: "./public/audio", // Directorio donde se guardarán los audios
-      keepExtensions: true, // Mantener la extensión del archivo
+      uploadDir: "./public/audio",
+      keepExtensions: true,
     });
 
     const incomingMessage = convertRequestToIncomingMessage(req);
 
-    // Promesa para manejar formidable
     const parseForm = () =>
       new Promise<{ fields: any; files: any }>((resolve, reject) => {
         form.parse(incomingMessage, (err, fields, files) => {
@@ -76,11 +69,11 @@ export async function POST(req: Request) {
 
     const { fields, files } = await parseForm();
 
-    // **Normalizar los campos recibidos**
+    // Normalizar los campos para asegurarnos de que sean cadenas
     const normalizedFields = Object.fromEntries(
       Object.entries(fields).map(([key, value]) => [
         key,
-        Array.isArray(value) ? value[0] : value,
+        Array.isArray(value) ? value[0] : value, // Si es un arreglo, tomar el primer elemento
       ])
     );
 
@@ -90,7 +83,6 @@ export async function POST(req: Request) {
 
     let audioUrl = null;
 
-    // Manejo del archivo de audio
     if (files.audio) {
       const file = Array.isArray(files.audio) ? files.audio[0] : files.audio;
       const uniqueName = `${Date.now()}-${file.originalFilename}`;
@@ -100,7 +92,6 @@ export async function POST(req: Request) {
       audioUrl = `/audio/${uniqueName}`;
     }
 
-    // Guardar en la base de datos
     await db.comment.create({
       data: {
         text,
