@@ -4,6 +4,16 @@ import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
 
+// Función para garantizar que la carpeta 'audio' exista
+function ensureAudioDirectoryExists() {
+  const audioDir = path.join(process.cwd(), "public", "audio");
+
+  if (!fs.existsSync(audioDir)) {
+    fs.mkdirSync(audioDir, { recursive: true });
+    console.log(`Audio directory created: ${audioDir}`);
+  }
+}
+
 // Función para eliminar el archivo de audio si existe
 function deleteAudioFile(audioUrl: string | null) {
   if (!audioUrl) return;
@@ -11,8 +21,12 @@ function deleteAudioFile(audioUrl: string | null) {
   const audioPath = path.join(process.cwd(), "public", audioUrl);
 
   try {
-    if (fs.existsSync(audioPath)) {
+    // Asegurarnos de que es un archivo
+    if (fs.existsSync(audioPath) && fs.lstatSync(audioPath).isFile()) {
       fs.unlinkSync(audioPath);
+      console.log(`Audio file deleted: ${audioPath}`);
+    } else {
+      console.warn(`Path is not a file or does not exist: ${audioPath}`);
     }
   } catch (err) {
     console.error(`Error deleting audio file (${audioUrl}):`, err);
