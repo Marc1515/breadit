@@ -4,6 +4,17 @@ import type { NextRequest } from "next/server";
 
 export async function middleware(req: NextRequest) {
   const pathname = req.nextUrl.pathname;
+  const method = req.method;
+
+  // Permitir todas las solicitudes hacia /api/uploadthing sin importar el método
+  if (pathname.startsWith("/api/uploadthing")) {
+    return NextResponse.next();
+  }
+
+  // Manejar solicitudes preflight (OPTIONS)
+  if (method === "OPTIONS") {
+    return NextResponse.next();
+  }
 
   // Rutas públicas que no requieren autenticación
   const publicPaths = [
@@ -16,8 +27,7 @@ export async function middleware(req: NextRequest) {
   ];
   const isPublicPath = publicPaths.some((path) => pathname.startsWith(path));
 
-  // Permitir acceso a rutas públicas y la API de UploadThing
-  if (isPublicPath || pathname.startsWith("/api/uploadthing")) {
+  if (isPublicPath) {
     return NextResponse.next();
   }
 
