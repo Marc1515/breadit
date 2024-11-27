@@ -77,6 +77,9 @@ export async function DELETE(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  // Garantizar que la carpeta 'audio' exista antes de cualquier operación
+  ensureAudioDirectoryExists();
+
   // Verificar si el post existe y si el usuario es el autor
   const post = await db.post.findFirst({
     where: {
