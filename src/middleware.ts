@@ -6,7 +6,7 @@ export async function middleware(req: NextRequest) {
   const pathname = req.nextUrl.pathname;
   const method = req.method;
 
-  // Permitir todas las solicitudes hacia /api/uploadthing sin importar el método
+  // Permitir todas las solicitudes hacia /api/uploadthing
   if (pathname.startsWith("/api/uploadthing")) {
     return NextResponse.next();
   }
