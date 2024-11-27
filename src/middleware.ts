@@ -4,13 +4,20 @@ import type { NextRequest } from "next/server";
 
 export async function middleware(req: NextRequest) {
   const pathname = req.nextUrl.pathname;
+  const method = req.method;
 
   // Excluir rutas específicas (API o rutas públicas)
   const publicPaths = ["/", "/sign-in", "/sign-up", "/about", "/contact"];
   const isPublicPath = publicPaths.some((path) => pathname.startsWith(path));
 
+  // Manejar solicitudes preflight (OPTIONS)
+  if (method === "OPTIONS") {
+    return NextResponse.next();
+  }
+
+  // Permitir acceso a rutas públicas y la API de UploadThing
   if (isPublicPath || pathname.startsWith("/api/uploadthing")) {
-    return NextResponse.next(); // Permitir continuar sin aplicar autenticación
+    return NextResponse.next();
   }
 
   // Verificar token de sesión
