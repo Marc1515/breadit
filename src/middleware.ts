@@ -8,12 +8,26 @@ export async function middleware(req: NextRequest) {
 
   console.log("Middleware triggered for:", pathname, "Method:", method);
 
-  // Permitir rutas públicas y solicitudes hacia /api/uploadthing
-  const publicPaths = ["/", "/sign-in", "/sign-up", "/sign-out"];
+  // Excluir rutas específicas de autenticación y API públicas
+  const publicPaths = [
+    "/",
+    "/sign-in",
+    "/sign-out",
+    "/sign-up",
+    "/about",
+    "/contact",
+  ];
   const isPublicPath = publicPaths.some((path) => pathname.startsWith(path));
 
-  if (isPublicPath || pathname.startsWith("/api/uploadthing")) {
-    console.log("Public or uploadthing path allowed.");
+  // Permitir todas las solicitudes hacia /api/uploadthing
+  if (pathname.startsWith("/api/uploadthing")) {
+    console.log("UploadThing request allowed.");
+    return NextResponse.next();
+  }
+
+  // Permitir rutas públicas
+  if (isPublicPath) {
+    console.log("Public path allowed.");
     return NextResponse.next();
   }
 
